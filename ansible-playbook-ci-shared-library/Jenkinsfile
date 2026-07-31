@@ -1,0 +1,35 @@
+@Library('ansible-playbook-ci-shared-library') _
+
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Ansible Playbook CI') {
+            steps {
+                // Adjust paths according to your repo layout
+                ansiblePlaybookCI(
+                    playbook: 'playbooks/site.yml',
+                    inventory: 'inventory/hosts',
+                    extraVars: '--extra-vars env=dev',
+                    workingDir: 'ansible'
+                )
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Ansible Playbook CI completed successfully.'
+        }
+        failure {
+            echo 'Ansible Playbook CI failed. Please check the logs.'
+        }
+    }
+}
